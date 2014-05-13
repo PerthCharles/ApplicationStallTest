@@ -58,7 +58,6 @@ int main(int argc, char *argv[])
         close(SocketFD);
         exit(EXIT_FAILURE);
     }
-    printf("#1#\n");
 
     if (connect(SocketFD, (struct sockaddr *)&S_sockaddr, sizeof(C_sockaddr)) == -1) {
         perror("connect error");
@@ -66,7 +65,6 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    printf("#2#\n");
     while (received_len < bufsize) {
         length = recv(SocketFD, buf, bufsize, 0);
         if (length < 0) {
@@ -75,8 +73,6 @@ int main(int argc, char *argv[])
         } else if (length > 0) {
             printf("    receive %d from server.\n", length);
             received_len += length;
-        } else {
-            printf("#-#");
         }
     }
 
