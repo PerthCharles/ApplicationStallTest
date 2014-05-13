@@ -29,8 +29,9 @@ int main(int argc, char * argv[])
 
     char *buf;
     int bufsize = atoi(argv[2]);
+    int i;
     buf = (char *)malloc(sizeof(char)*bufsize);
-    for (int i = 0; i < bufsize - 1; i++) {
+    for (i = 0; i < bufsize - 1; i++) {
         buf[i] = 'A' + i%26;
     }
     buf[bufsize - 1] = '\0';
