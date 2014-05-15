@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdint.h>
 
 #define True 1
 #define False 0
@@ -28,7 +29,10 @@ int main(int argc, char * argv[])
     int SocketFD;
 
     char *buf;
-    int bufsize = atoi(argv[2]);
+    uint32_t bufsize = atoi(argv[2]);
+    uint32_t sent = 0;
+    int len;
+
     int i;
     buf = (char *)malloc(sizeof(char)*bufsize);
     for (i = 0; i < bufsize - 1; i++) {
@@ -50,7 +54,7 @@ int main(int argc, char * argv[])
 
     memset(&S_sockaddr, 0, sizeof(S_sockaddr));
     S_sockaddr.sin_family = AF_INET;
-    S_sockaddr.sin_port = htons(23000);
+    S_sockaddr.sin_port = htons(8077);
     S_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(SocketFD, (struct sockaddr *)&S_sockaddr, sizeof(S_sockaddr)) == -1) {
@@ -72,18 +76,62 @@ int main(int argc, char * argv[])
             close(SocketFD);
             exit(EXIT_FAILURE);
         }
-        SetNonBlocking(connectFD);
 
         switch(atoi(argv[1])) {
             case 1:
+		// Send a large file with Blocking IO socket
+		sent = 0;
                 send(connectFD, buf, bufsize, 0);
+		sent = bufsize;
                 break;
+	    case 2:
+		// Send so quick so possible with Non Blocking IO socket
+		sent = 0;
+        	SetNonBlocking(connectFD);
+
+		while (sent < bufsize) {
+		    len = send(connectFD, buf + sent, bufsize - sent, 0);
+		    if (len > 0) {
+			sent += len;
+		    }
+		}
+		break;
+	    case 3:
+		// Send ONE PAGE(4K) a time with Blocking IO socket
+		sent = 0;
+		while(sent < bufsize) {
+		    if (bufsize - sent > 4096) {
+                	len = send(connectFD, buf, bufsize, 0);
+			if (len > 0) sent += len;
+		    } else {
+                	len = send(connectFD, buf, bufsize - sent, 0);
+			if (len > 0) sent += len;
+		    }
+		}
+		break;
+	    case 4:
+		// Send ONE PAGE(4K) a time with Non Blocking IO socket
+		sent = 0;
+        	SetNonBlocking(connectFD);
+
+		while(sent < bufsize) {
+		    if (bufsize - sent > 4096) {
+                	len = send(connectFD, buf, bufsize, 0);
+			if (len > 0) sent += len;
+		    } else {
+                	len = send(connectFD, buf, bufsize - sent, 0);
+			if (len > 0) sent += len;
+		    }
+		}
+		break;
             default:
                 printf("No corresponding test case number yet.\n");
         }
 
+	printf("Finish sending. Sent %u bytes.\n", sent);
         close(connectFD);
     }
+    free(buf);
     close(SocketFD);
     return EXIT_SUCCESS;
 }

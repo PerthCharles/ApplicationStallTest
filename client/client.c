@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
     struct sockaddr_in S_sockaddr, C_sockaddr;
     char *buf;
     int bufsize, length, received_len = 0, SocketFD;
+	fd_set c_fds;
+	struct timeval tv;
+	int sel_result;
 
     if (argc != 3) {
         printf("Usage: %s server-address buffer-size.\n", argv[0]);
@@ -45,13 +48,13 @@ int main(int argc, char *argv[])
 
     memset(&C_sockaddr, 0, sizeof(C_sockaddr));
     C_sockaddr.sin_family = AF_INET;
-    C_sockaddr.sin_port = htons(21111);
+    C_sockaddr.sin_port = htons(8067);
     C_sockaddr.sin_addr.s_addr = htons(INADDR_ANY);
 
     memset(&S_sockaddr, 0, sizeof(S_sockaddr));
     S_sockaddr.sin_family = AF_INET;
     inet_aton(argv[1], &S_sockaddr.sin_addr);
-    S_sockaddr.sin_port = htons(23000);
+    S_sockaddr.sin_port = htons(8077);
 
     if (bind(SocketFD, (struct sockaddr *)&C_sockaddr, sizeof(C_sockaddr)) == -1) {
         perror("bind failure");
@@ -65,21 +68,38 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    SetNonBlocking(SocketFD);
     while (received_len < bufsize) {
+        FD_ZERO(&c_fds);
+		FD_SET(SocketFD, &c_fds);
+		tv.tv_sec = 10;
+		tv.tv_usec = 0;
+		sel_result = select(SocketFD+1, &c_fds, NULL, NULL, &tv);
+		switch(sel_result) {
+			case 0:
+				printf("timeout.\n");
+				continue;
+			case 1:
+				break;
+			default:
+				printf("error.\n");
+				continue;
+		}
+		//printf("select  = %d\n", sel_result);
         length = recv(SocketFD, buf, bufsize, 0);
+		//printf("length = %d total = %d\n", length, received_len);
         if (length < 0) {
             perror("recv error");
             break;
         } else if (length > 0) {
-            printf("    receive %d from server.\n", length);
+         //   printf("    receive %d from server. total = %d\n", length, received_len);
             received_len += length;
         }
     }
 
-    if (received_len == bufsize) {
-        printf("received completed\n");
-    }   
+    printf("received completed with %d bytes.\n", received_len);
 
+    free(buf);
     close(SocketFD);
     return 0;
 }
