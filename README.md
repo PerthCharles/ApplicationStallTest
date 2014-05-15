@@ -12,3 +12,11 @@ and awnd.
 The phenomenon of 'Application Stall' was also mentioned in the paper  
 of [Proportional Rate Reduction](http://research.google.com/pubs/pub37486.html) by Google in SIGCOMM'2011.  
 
+# Four Test Modes  
+* Using send() to tranfer the whole buffer with Blocking IO Socket.  
+
+* Using send() to tranfer the whole buffer with Non-Blocking IO Socket  
+
+* Using send() to tranfer 4KB with Blocking IO Socket, until the whole buffer is tranfered.   
+
+* Using send() to tranfer 4KB with Non-Blocking IO Socket, until the whole buffer is tranfered.   
