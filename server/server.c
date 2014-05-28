@@ -34,18 +34,18 @@ int main(int argc, char * argv[])
     int len;
 
     int i;
-    buf = (char *)malloc(sizeof(char)*bufsize);
-    for (i = 0; i < bufsize - 1; i++) {
-        buf[i] = 'A' + i%26;
-    }
-    buf[bufsize - 1] = '\0';
-
     
     if (argc != 3) {
         printf("Usage: %s [test_case_no] buffer_size\n", argv[0]);
         exit(EXIT_SUCCESS);
     }
    
+    buf = (char *)malloc(sizeof(char)*bufsize);
+    for (i = 0; i < bufsize - 1; i++) {
+        buf[i] = 'A' + i%26;
+    }
+    buf[bufsize - 1] = '\0';
+
     SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (SocketFD == -1) {
         perror("Cannot create socket");
