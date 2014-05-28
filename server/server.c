@@ -101,10 +101,10 @@ int main(int argc, char * argv[])
 		sent = 0;
 		while(sent < bufsize) {
 		    if (bufsize - sent > 4096) {
-                	len = send(connectFD, buf, bufsize, 0);
+                	len = send(connectFD, buf + sent, 4096, 0);
 			if (len > 0) sent += len;
 		    } else {
-                	len = send(connectFD, buf, bufsize - sent, 0);
+                	len = send(connectFD, buf + sent, bufsize - sent, 0);
 			if (len > 0) sent += len;
 		    }
 		}
@@ -116,10 +116,10 @@ int main(int argc, char * argv[])
 
 		while(sent < bufsize) {
 		    if (bufsize - sent > 4096) {
-                	len = send(connectFD, buf, bufsize, 0);
+                	len = send(connectFD, buf + sent, 4096, 0);
 			if (len > 0) sent += len;
 		    } else {
-                	len = send(connectFD, buf, bufsize - sent, 0);
+                	len = send(connectFD, buf + sent, bufsize - sent, 0);
 			if (len > 0) sent += len;
 		    }
 		}
