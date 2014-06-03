@@ -15,7 +15,7 @@
 void SetNonBlocking(int sock)
 {
     int flags;
-    if ((flags = fcntl(sock, F_SETFL, 0)) < 0) {
+    if ((flags = fcntl(sock, F_GETFL, 0)) < 0) {
         flags = 0;
     }
     if (fcntl(sock, F_SETFL, flags|O_NONBLOCK) < 0) {
